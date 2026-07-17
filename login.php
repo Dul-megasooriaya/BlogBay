@@ -1,0 +1,196 @@
+<?php
+
+session_start();
+
+include "config.php";
+include "site_config.php";
+
+if(isset($_SESSION['user_id']))
+{
+    header("Location: dashboard.php");
+    exit();
+}
+
+$message = "";
+
+if(isset($_POST['login']))
+{
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    $emailSafe =
+        mysqli_real_escape_string(
+            $conn,
+            $email
+        );
+
+    $sql = "SELECT *
+            FROM user
+            WHERE email = '$emailSafe'
+            LIMIT 1";
+
+    $result = mysqli_query($conn, $sql);
+
+    if($result && mysqli_num_rows($result) === 1)
+    {
+        $user = mysqli_fetch_assoc($result);
+
+        if(password_verify(
+            $password,
+            $user['password']
+        ))
+        {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+
+            header("Location: dashboard.php");
+            exit();
+        }
+    }
+
+    $message = "Incorrect email or password.";
+}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>
+    Login | <?php echo htmlspecialchars($siteName); ?>
+</title>
+
+<link rel="stylesheet"
+href="css/login.css?v=10">
+
+</head>
+
+<body>
+
+<div class="login-layout">
+
+    <section class="login-image-panel">
+
+        <div class="login-image-overlay"></div>
+
+        <div class="image-brand">
+
+            <img
+                src="images/logo.png"
+                alt="<?php echo htmlspecialchars($siteName); ?> logo"
+            >
+
+            <?php echo renderSiteName(); ?>
+
+        </div>
+
+        <div class="image-text">
+
+            <h1>
+                Write freely.<br>
+                Share beautifully.
+            </h1>
+
+            <span>
+                Turn your thoughts and experiences
+                into stories worth sharing.
+            </span>
+
+        </div>
+
+    </section>
+
+    <section class="login-form-panel">
+
+        <div class="login-card">
+
+            <h2>
+                Welcome Back
+            </h2>
+
+            <p class="login-description">
+                Sign in to continue to your writing dashboard.
+            </p>
+
+            <?php if($message !== "") { ?>
+
+                <div class="login-error">
+
+                    <?php echo htmlspecialchars($message); ?>
+
+                </div>
+
+            <?php } ?>
+
+            <form method="POST">
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email address
+                    </label>
+
+                    <input
+                        id="email"
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        id="password"
+                        type="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                    >
+
+                </div>
+
+                <button
+                    type="submit"
+                    name="login"
+                    class="login-button">
+
+                    Sign In
+
+                </button>
+
+            </form>
+
+            <p class="register-text">
+
+                New to <?php echo htmlspecialchars($siteName); ?>?
+
+                <a href="register.php">
+                    Create an account
+                </a>
+
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+</body>
+
+</html>

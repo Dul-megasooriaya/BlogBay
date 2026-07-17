@@ -1,0 +1,76 @@
+.site-footer{
+    margin-top:65px;
+    padding:55px 6%;
+    background:#ffffff;
+    border-top:1px solid rgba(68,58,96,.10);
+    color:#302a42;
+}
+
+.footer-grid{
+    width:min(1250px,100%);
+    margin:0 auto;
+
+    display:grid;
+    grid-template-columns:1.5fr 1fr 1fr 1fr;
+    gap:45px;
+}
+
+.footer-brand h2{
+    margin-bottom:14px;
+    font-size:23px;
+}
+
+.footer-brand p{
+    max-width:310px;
+    margin-bottom:22px;
+
+    color:#7d778c;
+    font-size:12px;
+    line-height:1.8;
+}
+
+.footer-brand small{
+    color:#9a94a6;
+    font-size:10px;
+}
+
+.footer-column h3{
+    margin-bottom:17px;
+    font-size:13px;
+}
+
+.footer-column a,
+.footer-column p{
+    display:block;
+    margin-bottom:11px;
+
+    color:#7d778c;
+    text-decoration:none;
+    font-size:11px;
+    line-height:1.6;
+}
+
+.footer-column a:hover{
+    color:#9368b8;
+}
+
+@media(max-width:850px){
+
+    .footer-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:520px){
+
+    .footer-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+/* ===== BlogBay shared branding ===== */
+.site-name{display:inline-flex;align-items:baseline;font:inherit;font-weight:800;letter-spacing:-1px;line-height:1;}
+.site-name-blog{color:#000000 !important;}
+.site-name-bay{color:#9368b8 !important;}
