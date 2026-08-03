@@ -155,10 +155,15 @@ if(isset($_POST['update']))
 
 <title>Edit Blog | <?php echo htmlspecialchars($siteName); ?></title>
 
-<link rel="stylesheet" href="css/edit_blog.css?v=31">
+<link rel="stylesheet" href="css/create_blog.css?v=<?php echo time(); ?>">
+<link rel="stylesheet" href="css/edit_blog.css?v=<?php echo time(); ?>">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<script>
+    window.CURRENT_USER_ID = "<?php echo (int)$_SESSION['user_id']; ?>";
+</script>
 
 </head>
 
@@ -185,24 +190,20 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 <main class="page-wrapper">
 
-    <section class="editor-header">
+    <div class="editor-header-plain">
 
-        <div>
-
-            <h1>Edit your story</h1>
-
-            <p class="subtitle">
-                Update your article, change the cover image, and publish your improvements.
-            </p>
-
-        </div>
+        <h1>
+            Edit your story
+        </h1>
 
         <div class="author-card">
 
             <?php echo renderUserAvatar($_SESSION['username'], $_SESSION['profile_pic'] ?? null, 'author-avatar'); ?>
 
             <div>
+
                 <span>Editing as</span>
+
                 <strong>
                     <?php
                     echo htmlspecialchars(
@@ -210,11 +211,12 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
                     );
                     ?>
                 </strong>
+
             </div>
 
         </div>
 
-    </section>
+    </div>
 
     <?php if($message !== "") { ?>
 
@@ -228,23 +230,22 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
     <?php } ?>
 
+    <!-- Single Column Full-Width Edit Form -->
     <form
         method="POST"
         enctype="multipart/form-data"
         class="editor-form">
 
-        <section class="editor-card">
+        <!-- Unified Purple Section Card -->
+        <section class="editor-card unified-editor-card">
 
             <div class="section-heading">
 
-                <div class="section-icon">
-                    <i class="fa-solid fa-heading"></i>
-                </div>
+                <h2>Blog Details & Content</h2>
 
-                <div>
-                    <h2>Blog details</h2>
-                    <p>Update the title or replace the current cover image.</p>
-                </div>
+                <p>
+                    Update your title, replace your cover image, and revise your story below.
+                </p>
 
             </div>
 
@@ -276,12 +277,12 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
             <div class="form-group">
 
                 <label>
-                    Current featured image
+                    Featured image
                 </label>
 
                 <?php if(!empty($blog['image'])) { ?>
 
-                    <div class="current-image-wrapper">
+                    <div class="current-image-wrapper" style="margin-bottom:14px;">
 
                         <img
                             src="uploads/<?php
@@ -291,25 +292,12 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
                             ?>"
                             alt="Current featured image"
                             class="current-image"
+                            style="max-height:220px; width:100%; border-radius:16px; object-fit:cover; border:1px solid rgba(255,255,255,0.3);"
                         >
 
                     </div>
 
-                <?php } else { ?>
-
-                    <div class="no-image">
-                        No featured image is currently assigned.
-                    </div>
-
                 <?php } ?>
-
-            </div>
-
-            <div class="form-group">
-
-                <label>
-                    Replace featured image
-                </label>
 
                 <label for="image" class="upload-box">
 
@@ -322,18 +310,16 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
                     <div id="uploadPrompt" class="upload-prompt">
 
-                        <div class="upload-icon">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                        </div>
+                        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
 
-                        <h3>Choose a new image</h3>
+                        <h3>Choose a new cover image</h3>
 
                         <p>
                             Leave this empty to keep the current image.
                         </p>
 
                         <small>
-                            JPG, PNG or WEBP — maximum 5MB
+                            JPG, PNG or WEBP · Maximum 5MB
                         </small>
 
                     </div>
@@ -348,27 +334,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
             </div>
 
-        </section>
-
-        <section class="editor-card">
-
-            <div class="section-heading">
-
-                <div class="section-icon">
-                    <i class="fa-solid fa-pen-nib"></i>
-                </div>
-
-                <div>
-                    <h2>Update your article</h2>
-                    <p>Review and improve your blog content.</p>
-                </div>
-
-            </div>
-
             <div class="form-group">
 
                 <label for="content">
-                    Blog content
+                    Your story
                     <span>*</span>
                 </label>
 
@@ -430,52 +399,52 @@ const uploadPrompt = document.getElementById("uploadPrompt");
 
 function updateTitleCount()
 {
-    titleCount.textContent =
-        titleInput.value.length + " / 255";
+    if (titleInput && titleCount) {
+        titleCount.textContent =
+            titleInput.value.length + " / 255";
+    }
 }
 
 function updateContentCount()
 {
-    contentCount.textContent =
-        contentInput.value.length + " characters";
+    if (contentInput && contentCount) {
+        contentCount.textContent =
+            contentInput.value.length + " characters";
+    }
 }
 
-titleInput.addEventListener(
-    "input",
-    updateTitleCount
-);
+if (titleInput) {
+    titleInput.addEventListener("input", updateTitleCount);
+    updateTitleCount();
+}
 
-contentInput.addEventListener(
-    "input",
-    updateContentCount
-);
+if (contentInput) {
+    contentInput.addEventListener("input", updateContentCount);
+    updateContentCount();
+}
 
-updateTitleCount();
-updateContentCount();
-
-imageInput.addEventListener(
-    "change",
-    function()
-    {
+if (imageInput) {
+    imageInput.addEventListener("change", function() {
         const file = this.files[0];
-
-        if(file)
-        {
+        if (file) {
             const reader = new FileReader();
-
-            reader.onload = function(event)
-            {
-                imagePreview.src = event.target.result;
-                imagePreview.style.display = "block";
-                uploadPrompt.style.display = "none";
+            reader.onload = function(event) {
+                if (imagePreview) {
+                    imagePreview.src = event.target.result;
+                    imagePreview.style.display = "block";
+                }
+                if (uploadPrompt) {
+                    uploadPrompt.style.display = "none";
+                }
             };
-
             reader.readAsDataURL(file);
         }
-    }
-);
+    });
+}
 
 </script>
+
+<script src="js/search_highlight.js?v=<?php echo time(); ?>"></script>
 
 </body>
 

@@ -211,27 +211,7 @@ href="css/footer.css?v=3">
 
     </article>
 
-    <section class="more-section">
 
-        <div>
-
-            <p>KEEP READING</p>
-
-            <h2>
-                Discover more stories
-            </h2>
-
-            <span>
-                Return to the blog list and explore other articles.
-            </span>
-
-        </div>
-
-        <a href="<?php echo $backPage; ?>">
-            Browse Blogs
-        </a>
-
-    </section>
 
 </main>
 

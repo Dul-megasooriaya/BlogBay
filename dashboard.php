@@ -38,7 +38,7 @@ $myResult = mysqli_query(
 $myData = mysqli_fetch_assoc($myResult);
 $myBlogs = (int) ($myData['total'] ?? 0);
 
-$blogsPerPage = 6;
+$blogsPerPage = 8;
 
 $page = isset($_GET['page']) && is_numeric($_GET['page'])
     ? (int) $_GET['page']
@@ -321,7 +321,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         <aside class="video-guides-sidebar">
             <div class="sidebar-header">
                 <h3>Blogger Guides</h3>
-                <span>How-to Tutorials</span>
             </div>
 
             <div class="sidebar-guide-cards">

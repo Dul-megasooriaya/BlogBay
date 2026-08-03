@@ -180,7 +180,7 @@ if(isset($_POST['publish']))
 
 <main class="page-wrapper">
 
-    <section class="editor-header-card">
+    <div class="editor-header-plain">
 
         <h1>
             Write something new
@@ -206,7 +206,7 @@ if(isset($_POST['publish']))
 
         </div>
 
-    </section>
+    </div>
 
     <?php if($message !== "") { ?>
 
@@ -750,6 +750,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
+<script src="js/search_highlight.js?v=<?php echo time(); ?>"></script>
 
 </body>
 

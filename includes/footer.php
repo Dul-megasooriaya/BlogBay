@@ -87,3 +87,5 @@
     </div>
 
 </footer>
+
+<script src="js/search_highlight.js?v=<?php echo time(); ?>"></script>

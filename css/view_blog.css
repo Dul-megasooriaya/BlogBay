@@ -418,6 +418,9 @@ body{
     gap: 10px;
 }
 
+.hero-brand .site-name-blog { color: #ffffff !important; }
+.hero-brand .site-name-bay { color: #9368b8 !important; }
+
 .hero-nav-item {
     display: inline-flex;
     align-items: center;

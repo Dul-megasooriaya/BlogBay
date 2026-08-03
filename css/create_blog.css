@@ -71,21 +71,16 @@ body{
     padding:40px 0 70px;
 }
 
-.editor-header-card{
-    margin-bottom:30px;
-    padding:22px 30px;
-    background:var(--white);
-    border-radius:24px;
-    border:1px solid var(--border);
-    box-shadow:0 8px 30px rgba(0, 0, 0, 0.03);
+.editor-header-plain{
+    margin-bottom:28px;
 
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:28px;
+    gap:24px;
 }
 
-.editor-header-card h1{
+.editor-header-plain h1{
     color:var(--text);
     font-size:34px;
     font-weight:800;
@@ -93,7 +88,7 @@ body{
     margin:0;
 }
 
-.editor-header-card .author-card{
+.editor-header-plain .author-card{
     min-width:190px;
     padding:10px 16px;
 
@@ -104,8 +99,8 @@ body{
     border:1px solid var(--border);
     border-radius:16px;
 
-    background:var(--background);
-    box-shadow:none;
+    background:var(--white);
+    box-shadow:0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
 .author-avatar{

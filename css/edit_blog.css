@@ -187,6 +187,63 @@ body{
     background:white;
 }
 
+.unified-editor-card {
+    background: linear-gradient(135deg, #9368b8 0%, #7b4f9d 100%) !important;
+    color: #ffffff !important;
+    border-radius: 28px !important;
+    padding: 36px !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 14px 40px rgba(147, 104, 184, 0.25) !important;
+}
+
+.unified-editor-card .section-heading {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.unified-editor-card .section-heading h2 {
+    color: #ffffff !important;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+}
+
+.unified-editor-card .section-heading p {
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-size: 13px !important;
+}
+
+.unified-editor-card label {
+    color: #ffffff !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.unified-editor-card label span {
+    color: #ffb703 !important;
+}
+
+.unified-editor-card .field-info {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.unified-editor-card .upload-box {
+    border: 2px dashed rgba(255, 255, 255, 0.7) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    transition: all 0.2s ease !important;
+}
+
+.unified-editor-card .upload-box:hover {
+    border-color: #ffffff !important;
+    background: #ffffff !important;
+}
+
+.unified-editor-card .upload-icon {
+    color: var(--purple) !important;
+}
+
+.unified-editor-card .upload-prompt h3 {
+    color: var(--purple) !important;
+}
+
 .section-heading{
     margin-bottom:27px;
     padding-bottom:20px;
