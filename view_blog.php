@@ -69,7 +69,7 @@ href="css/footer.css?v=3">
 <header class="hero-navbar">
     <div class="hero-navbar-inner">
         <a href="dashboard.php" class="hero-brand">
-            <img src="images/logo.png" alt="Logo">
+            <?php echo renderSiteLogo(); ?>
             <?php echo renderSiteName(); ?>
         </a>
         <nav class="hero-nav-links">

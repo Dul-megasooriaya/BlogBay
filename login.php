@@ -84,10 +84,7 @@ href="css/login.css?v=10">
 
         <div class="image-brand">
 
-            <img
-                src="images/logo.png"
-                alt="<?php echo htmlspecialchars($siteName); ?> logo"
-            >
+            <?php echo renderSiteLogo(); ?>
 
             <?php echo renderSiteName(); ?>
 

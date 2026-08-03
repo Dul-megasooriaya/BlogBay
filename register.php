@@ -130,11 +130,7 @@ href="css/register.css?v=1">
 
         <div class="image-brand">
 
-            <img
-                src="images/logo.png"
-                alt="BlogBay logo"
-                class="brand-image"
-            >
+            <?php echo renderSiteLogo(); ?>
 
             <?php echo renderSiteName(); ?>
 

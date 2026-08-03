@@ -172,7 +172,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 <header class="hero-navbar">
     <div class="hero-navbar-inner">
         <a href="dashboard.php" class="hero-brand">
-            <img src="images/logo.png" alt="Logo">
+            <?php echo renderSiteLogo(); ?>
             <?php echo renderSiteName(); ?>
         </a>
         <nav class="hero-nav-links">

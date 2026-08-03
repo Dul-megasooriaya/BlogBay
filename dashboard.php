@@ -104,7 +104,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
         <!-- Left: Logo & Brand Name -->
         <a href="dashboard.php" class="hero-brand">
-            <img src="images/logo.png" alt="<?php echo htmlspecialchars($siteName); ?> logo">
+            <?php echo renderSiteLogo(); ?>
             <?php echo renderSiteName(); ?>
         </a>
 
