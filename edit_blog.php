@@ -10,6 +10,11 @@ if(!isset($_SESSION['user_id']))
     exit();
 }
 
+if(!isset($_SESSION['profile_pic']))
+{
+    $_SESSION['profile_pic'] = getUserProfilePic($conn, (int)$_SESSION['user_id']);
+}
+
 if(!isset($_GET['id']) || !is_numeric($_GET['id']))
 {
     header("Location: dashboard.php");
@@ -159,22 +164,23 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 <body>
 
-<header class="topbar">
-
-    <a href="dashboard.php" class="brand">
-        <img class="brand-logo-image" src="images/logo.png" alt="BlogBay logo" width="42" height="42">
-        <?php echo renderSiteName(); ?>
-    </a>
-
-    <a
-        href="view_blog.php?id=<?php echo $blogID; ?>"
-        class="back-link">
-
-        <i class="fa-solid fa-arrow-left"></i>
-        Back to Blog
-
-    </a>
-
+<header class="hero-navbar">
+    <div class="hero-navbar-inner">
+        <a href="dashboard.php" class="hero-brand">
+            <img src="images/logo.png" alt="Logo">
+            <?php echo renderSiteName(); ?>
+        </a>
+        <nav class="hero-nav-links">
+            <a href="dashboard.php" class="hero-nav-item">Dashboard</a>
+            <a href="dashboard.php#blogGrid" class="hero-nav-item">Blogs</a>
+            <a href="reviews.php" class="hero-nav-item">Review</a>
+            <a href="profile.php" class="hero-nav-item">Profile</a>
+        </nav>
+        <div class="hero-search-box" style="position: relative; display: flex; align-items: center; background: rgba(255, 255, 255, 0.15) !important; border: 1px solid rgba(255, 255, 255, 0.25) !important; border-radius: 999px !important; padding: 6px 16px !important; width: 210px !important;">
+            <i class="fa-solid fa-magnifying-glass" style="color: rgba(255, 255, 255, 0.8) !important; margin-right: 8px !important; font-size: 13px !important;"></i>
+            <input id="blogSearch" type="text" placeholder="Search..." style="background: transparent !important; border: none !important; outline: none !important; color: #ffffff !important; font-size: 13px !important; width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; height: auto !important;" onkeydown="if(event.key==='Enter'){ window.location.href='dashboard.php?search='+encodeURIComponent(this.value); }">
+        </div>
+    </div>
 </header>
 
 <main class="page-wrapper">
@@ -193,13 +199,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
         <div class="author-card">
 
-            <div class="author-avatar">
-                <?php
-                echo strtoupper(
-                    substr($_SESSION['username'], 0, 1)
-                );
-                ?>
-            </div>
+            <?php echo renderUserAvatar($_SESSION['username'], $_SESSION['profile_pic'] ?? null, 'author-avatar'); ?>
 
             <div>
                 <span>Editing as</span>

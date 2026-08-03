@@ -131,6 +131,15 @@ body{
     color:white;
 
     font-weight:700;
+    overflow:hidden;
+}
+
+.author-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+    display:block;
 }
 
 .author-card span,
@@ -463,6 +472,121 @@ textarea:focus{
 
 .brand{display:flex;align-items:center;gap:11px;color:inherit;}
 .brand img{width:42px;height:42px;object-fit:contain;}
+
+/* HERO NAVBAR */
+.hero-navbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 76px;
+    z-index: 1000;
+    background: #1d172b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.hero-navbar-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    height: 100%;
+    padding: 0 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.hero-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.hero-brand img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.hero-brand .site-name-blog { color: #ffffff !important; }
+.hero-brand .site-name-bay { color: #9368b8 !important; }
+
+.hero-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hero-nav-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    background: transparent;
+    border: 2px solid transparent;
+    outline: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.hero-nav-item:hover {
+    outline: 2px solid #9368b8 !important;
+    color: #ffffff !important;
+}
+
+.hero-nav-item.active {
+    background-color: #9368b8 !important;
+    color: #ffffff !important;
+    outline: 2px solid #9368b8 !important;
+}
+
+/* SEARCH BOX DARK GLASSMORPHISM FIX */
+.hero-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-radius: 999px !important;
+    padding: 0 16px !important;
+    min-width: 170px;
+    max-width: 240px;
+    backdrop-filter: blur(10px);
+}
+
+.hero-search-box i {
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 13px !important;
+    margin-right: 8px !important;
+}
+
+.hero-search-box input {
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+.hero-search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
 
 
 /* Header branding hard fix */

@@ -7,16 +7,16 @@ include "site_config.php";
 
 if(!isset($_GET['id']) || !is_numeric($_GET['id']))
 {
-    header("Location: index.php");
+    header("Location: login.php");
     exit();
 }
 
 $blogID = (int) $_GET['id'];
 
-$sql = "SELECT blogpost.*, user.username
+$sql = "SELECT blogpost.*, user.username, p.profile_pic
         FROM blogpost
-        JOIN user
-        ON blogpost.user_id = user.id
+        JOIN user ON blogpost.user_id = user.id
+        LEFT JOIN user_profiles p ON user.id = p.user_id
         WHERE blogpost.id = $blogID
         LIMIT 1";
 
@@ -24,7 +24,7 @@ $result = mysqli_query($conn, $sql);
 
 if(!$result || mysqli_num_rows($result) !== 1)
 {
-    header("Location: index.php");
+    header("Location: login.php");
     exit();
 }
 
@@ -37,7 +37,7 @@ $isOwner =
 $backPage =
     isset($_SESSION['user_id'])
         ? "dashboard.php"
-        : "index.php";
+        : "login.php";
 
 ?>
 
@@ -66,38 +66,23 @@ href="css/footer.css?v=3">
 
 <body>
 
-<header class="topbar">
-
-    <a href="<?php echo $backPage; ?>"
-       class="brand">
-
-        <img src="images/logo.png" alt="BlogBay logo">
-        <?php echo renderSiteName(); ?>
-
-    </a>
-
-    <nav class="top-navigation">
-
-        <a href="<?php echo $backPage; ?>">
-            Back to Blogs
+<header class="hero-navbar">
+    <div class="hero-navbar-inner">
+        <a href="dashboard.php" class="hero-brand">
+            <img src="images/logo.png" alt="Logo">
+            <?php echo renderSiteName(); ?>
         </a>
-
-        <?php if(isset($_SESSION['user_id'])) { ?>
-
-            <a href="profile.php">
-                My Profile
-            </a>
-
-        <?php } else { ?>
-
-            <a href="login.php">
-                Sign In
-            </a>
-
-        <?php } ?>
-
-    </nav>
-
+        <nav class="hero-nav-links">
+            <a href="dashboard.php" class="hero-nav-item">Dashboard</a>
+            <a href="dashboard.php#blogGrid" class="hero-nav-item">Blogs</a>
+            <a href="reviews.php" class="hero-nav-item">Review</a>
+            <a href="profile.php" class="hero-nav-item">Profile</a>
+        </nav>
+        <div class="hero-search-box" style="position: relative; display: flex; align-items: center; background: rgba(255, 255, 255, 0.15) !important; border: 1px solid rgba(255, 255, 255, 0.25) !important; border-radius: 999px !important; padding: 6px 16px !important; width: 210px !important;">
+            <i class="fa-solid fa-magnifying-glass" style="color: rgba(255, 255, 255, 0.8) !important; margin-right: 8px !important; font-size: 13px !important;"></i>
+            <input id="blogSearch" type="text" placeholder="Search..." style="background: transparent !important; border: none !important; outline: none !important; color: #ffffff !important; font-size: 13px !important; width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; height: auto !important;" onkeydown="if(event.key==='Enter'){ window.location.href='dashboard.php?search='+encodeURIComponent(this.value); }">
+        </div>
+    </div>
 </header>
 
 <main class="article-wrapper">
@@ -119,15 +104,7 @@ href="css/footer.css?v=3">
 
             <div class="author-row">
 
-                <div class="author-avatar">
-
-                    <?php
-                    echo strtoupper(
-                        substr($blog['username'], 0, 1)
-                    );
-                    ?>
-
-                </div>
+                <?php echo renderUserAvatar($blog['username'], $blog['profile_pic'] ?? null, 'author-avatar'); ?>
 
                 <div class="author-details">
 

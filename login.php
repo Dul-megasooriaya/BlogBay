@@ -43,6 +43,7 @@ if(isset($_POST['login']))
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $user['email'];
+            $_SESSION['profile_pic'] = getUserProfilePic($conn, (int)$user['id']);
 
             header("Location: dashboard.php");
             exit();
