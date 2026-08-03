@@ -87,9 +87,10 @@ content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet"
 href="css/dashboard_v2.css?v=99999">
-
 <link rel="stylesheet"
 href="css/footer.css?v=4">
+<link rel="stylesheet"
+href="css/responsive.css?v=<?php echo time(); ?>">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -130,6 +131,17 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
             <input id="blogSearch" type="text" placeholder="Search..." style="background: transparent !important; border: none !important; outline: none !important; color: #ffffff !important; font-size: 13px !important; width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; height: auto !important;" value="<?php echo htmlspecialchars($search); ?>" onkeydown="if(event.key==='Enter'){ window.location.href='dashboard.php?search='+encodeURIComponent(this.value); }">
         </div>
 
+        <button type="button" class="mobile-menu-toggle" onclick="toggleMobileMenu(this)" title="Toggle navigation menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </div>
+
+    <div class="mobile-dropdown-menu" id="mobileDropdownMenu">
+        <a href="dashboard.php" class="mobile-nav-item <?php echo ($page === 1 && empty($search)) ? 'active' : ''; ?>">Dashboard</a>
+        <a href="dashboard.php#blogGrid" class="mobile-nav-item <?php echo ($page > 1 || !empty($search)) ? 'active' : ''; ?>">Blogs</a>
+        <a href="reviews.php" class="mobile-nav-item">Review</a>
+        <a href="profile.php" class="mobile-nav-item">Profile</a>
     </div>
 
 </header>
@@ -345,7 +357,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
                         <h4 class="guide-card-title">How to Write Compelling Blog Articles</h4>
                         <p class="guide-card-desc">Master essential techniques for structuring your posts, crafting catchy headlines, and engaging readers from the first sentence.</p>
                         <div class="guide-card-footer">
-                            <i class="fa-regular fa-clock"></i> Aug 02, 2026 • 5 min watch
+                            <i class="fa-regular fa-clock"></i> Aug 02, 2026
                         </div>
                     </div>
                 </article>
@@ -370,7 +382,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
                         <h4 class="guide-card-title">Key Components of a Blog Post</h4>
                         <p class="guide-card-desc">Discover the essential structure of a high-performing blog post—from attention-grabbing titles and introduction hooks to structured body paragraphs and clear call-to-actions.</p>
                         <div class="guide-card-footer">
-                            <i class="fa-regular fa-clock"></i> Aug 03, 2026 • 6 min watch
+                            <i class="fa-regular fa-clock"></i> Aug 03, 2026
                         </div>
                     </div>
                 </article>
@@ -395,7 +407,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
                         <h4 class="guide-card-title">SEO Basics for Content Authors</h4>
                         <p class="guide-card-desc">Understand keyword optimization, meta descriptions, and clean link structures to rank your blogs higher on Google.</p>
                         <div class="guide-card-footer">
-                            <i class="fa-regular fa-clock"></i> Aug 02, 2026 • 6 min watch
+                            <i class="fa-regular fa-clock"></i> Aug 02, 2026
                         </div>
                     </div>
                 </article>
@@ -420,7 +432,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
                         <h4 class="guide-card-title">Building & Engaging Your Audience</h4>
                         <p class="guide-card-desc">Discover proven strategies to encourage comments, reactions, and social shares to grow a loyal readership.</p>
                         <div class="guide-card-footer">
-                            <i class="fa-regular fa-clock"></i> Aug 02, 2026 • 8 min watch
+                            <i class="fa-regular fa-clock"></i> Aug 02, 2026
                         </div>
                     </div>
                 </article>

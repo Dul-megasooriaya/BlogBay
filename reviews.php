@@ -264,6 +264,7 @@ $reviewsRes = mysqli_query($conn, $querySQL);
     <title>Writers' Reviews & Community | <?php echo htmlspecialchars($siteName); ?></title>
     <link rel="stylesheet" href="css/reviews.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/footer.css?v=5">
+    <link rel="stylesheet" href="css/responsive.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 <body>
@@ -284,6 +285,15 @@ $reviewsRes = mysqli_query($conn, $querySQL);
             <i class="fa-solid fa-magnifying-glass" style="color: rgba(255, 255, 255, 0.8) !important; margin-right: 8px !important; font-size: 13px !important;"></i>
             <input id="blogSearch" type="text" placeholder="Search..." style="background: transparent !important; border: none !important; outline: none !important; color: #ffffff !important; font-size: 13px !important; width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; height: auto !important;" onkeydown="if(event.key==='Enter'){ window.location.href='dashboard.php?search='+encodeURIComponent(this.value); }">
         </div>
+        <button type="button" class="mobile-menu-toggle" onclick="toggleMobileMenu(this)" title="Toggle navigation menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+    <div class="mobile-dropdown-menu" id="mobileDropdownMenu">
+        <a href="dashboard.php" class="mobile-nav-item">Dashboard</a>
+        <a href="dashboard.php#blogGrid" class="mobile-nav-item">Blogs</a>
+        <a href="reviews.php" class="mobile-nav-item active">Review</a>
+        <a href="profile.php" class="mobile-nav-item">Profile</a>
     </div>
 </header>
 

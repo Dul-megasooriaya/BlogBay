@@ -120,6 +120,8 @@ href="css/register.css?v=1">
 <link rel="stylesheet"
 href="css/footer.css?v=<?php echo time(); ?>">
 <link rel="stylesheet"
+href="css/responsive.css?v=<?php echo time(); ?>">
+<link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 </head>

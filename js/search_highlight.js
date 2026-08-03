@@ -115,3 +115,36 @@ function highlightNode(node, regex) {
         }
     }
 }
+
+// MOBILE HAMBURGER MENU DROPDOWN HANDLER
+function toggleMobileMenu(btn) {
+    const dropdown = document.getElementById("mobileDropdownMenu");
+    if (!dropdown) return;
+    
+    dropdown.classList.toggle("open");
+    
+    if (btn) {
+        const icon = btn.querySelector("i");
+        if (icon) {
+            if (dropdown.classList.contains("open")) {
+                icon.className = "fa-solid fa-xmark";
+            } else {
+                icon.className = "fa-solid fa-bars";
+            }
+        }
+    }
+}
+
+document.addEventListener("click", function(e) {
+    const dropdown = document.getElementById("mobileDropdownMenu");
+    const toggleBtn = document.querySelector(".mobile-menu-toggle");
+    if (dropdown && dropdown.classList.contains("open")) {
+        if (!dropdown.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+            dropdown.classList.remove("open");
+            if (toggleBtn) {
+                const icon = toggleBtn.querySelector("i");
+                if (icon) icon.className = "fa-solid fa-bars";
+            }
+        }
+    }
+});
