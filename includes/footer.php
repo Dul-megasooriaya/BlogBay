@@ -68,19 +68,21 @@
 
         <div class="footer-column">
 
-            <h3>Contact</h3>
+            <h3>Connect With Us</h3>
 
-            <p>
-                University of Moratuwa
-            </p>
+            <div class="footer-social-icons" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; gap: 10px !important; margin-top: 12px !important;">
+                <a href="https://wa.me/0722325117" target="_blank" rel="noopener noreferrer" title="WhatsApp" class="social-icon-link whatsapp-icon" style="display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 36px !important; height: 36px !important; margin: 0 !important;">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </a>
 
-            <p>
-                IN2120 Web Programming
-            </p>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram" class="social-icon-link instagram-icon" style="display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 36px !important; height: 36px !important; margin: 0 !important;">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
 
-            <p>
-                Sri Lanka
-            </p>
+                <a href="https://www.linkedin.com/in/dulmini-megasooriya-a026a7320?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank" rel="noopener noreferrer" title="LinkedIn" class="social-icon-link linkedin-icon" style="display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 36px !important; height: 36px !important; margin: 0 !important;">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+            </div>
 
         </div>
 

@@ -993,3 +993,66 @@ body{
 }
 
 .logo-link{display:flex;align-items:center;gap:11px;color:inherit;}
+
+/* GLOBAL RESPONSIVE MEDIA QUERIES FOR ALL SCREEN SIZES */
+@media (max-width: 1024px) {
+    .dashboard-content-layout {
+        grid-template-columns: 1fr !important;
+    }
+    .video-guides-sidebar {
+        order: 2;
+    }
+    .dashboard-main-grid {
+        order: 1;
+    }
+    .hero-navbar-inner {
+        padding: 0 20px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-navbar-inner {
+        flex-wrap: wrap !important;
+        height: auto !important;
+        padding: 12px 16px !important;
+        gap: 12px !important;
+    }
+
+    .hero-nav-links {
+        order: 3 !important;
+        width: 100% !important;
+        justify-content: space-around !important;
+        gap: 8px !important;
+    }
+
+    .hero-search-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        order: 2 !important;
+    }
+
+    .summary-row {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    .blog-cards-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-brand {
+        font-size: 18px !important;
+    }
+
+    .hero-nav-item {
+        font-size: 13px !important;
+        padding: 4px 8px !important;
+    }
+
+    .guide-video-wrapper video,
+    .guide-video-placeholder {
+        height: 180px !important;
+    }
+}

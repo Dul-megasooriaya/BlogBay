@@ -157,6 +157,7 @@ if(isset($_POST['update']))
 
 <link rel="stylesheet" href="css/create_blog.css?v=<?php echo time(); ?>">
 <link rel="stylesheet" href="css/edit_blog.css?v=<?php echo time(); ?>">
+<link rel="stylesheet" href="css/footer.css?v=<?php echo time(); ?>">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -444,7 +445,7 @@ if (imageInput) {
 
 </script>
 
-<script src="js/search_highlight.js?v=<?php echo time(); ?>"></script>
+<?php include "includes/footer.php"; ?>
 
 </body>
 

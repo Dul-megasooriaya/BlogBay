@@ -359,18 +359,18 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
                                 <source src="videos/guide_2.mp4" type="video/mp4">
                             </video>
                         <?php } else { ?>
-                            <div class="guide-video-placeholder" onclick="openTutorialVideo('Formatting & Media Best Practices', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4')">
+                            <div class="guide-video-placeholder" onclick="openTutorialVideo('Key Components of a Blog Post', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4')">
                                 <i class="fa-solid fa-circle-play video-play-btn" style="color:var(--purple);"></i>
-                                <span style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.9);">Formatting & Media</span>
+                                <span style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.9);">Key Components</span>
                                 <small style="font-size:10px; color:rgba(255,255,255,0.6); margin-top:4px;">Click to watch tutorial</small>
                             </div>
                         <?php } ?>
                     </div>
                     <div class="guide-card-body">
-                        <h4 class="guide-card-title">Formatting & Media Best Practices</h4>
-                        <p class="guide-card-desc">Learn how to effectively use headings, vibrant images, and video embeds to make your content visually appealing.</p>
+                        <h4 class="guide-card-title">Key Components of a Blog Post</h4>
+                        <p class="guide-card-desc">Discover the essential structure of a high-performing blog post—from attention-grabbing titles and introduction hooks to structured body paragraphs and clear call-to-actions.</p>
                         <div class="guide-card-footer">
-                            <i class="fa-regular fa-clock"></i> Aug 02, 2026 • 7 min watch
+                            <i class="fa-regular fa-clock"></i> Aug 03, 2026 • 6 min watch
                         </div>
                     </div>
                 </article>

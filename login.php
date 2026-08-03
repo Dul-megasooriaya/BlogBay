@@ -71,6 +71,10 @@ content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet"
 href="css/login.css?v=10">
+<link rel="stylesheet"
+href="css/footer.css?v=<?php echo time(); ?>">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 </head>
 
@@ -188,6 +192,8 @@ href="css/login.css?v=10">
     </section>
 
 </div>
+
+<?php include "includes/footer.php"; ?>
 
 </body>
 
