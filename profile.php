@@ -1,9 +1,10 @@
 <?php
-
-session_start();
-
 include "config.php";
+include "includes/session_manager.php";
 include "site_config.php";
+
+// Check session
+checkRememberMeCookie($conn);
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -14,7 +15,7 @@ $userID = (int) $_SESSION['user_id'];
 $message = "";
 $messageType = "";
 
-// Auto Database Migration for dedicated user_profiles Table
+// Setup profile table
 mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `user_profiles` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `user_id` INT NOT NULL UNIQUE,
@@ -31,10 +32,10 @@ mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `user_profiles` (
     FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-// Ensure default profile row exists for current user
+// Ensure profile row
 mysqli_query($conn, "INSERT IGNORE INTO `user_profiles` (`user_id`) VALUES ($userID)");
 
-// Handle Profile Form Updates
+// Update profile
 if (isset($_POST['update_profile'])) {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
@@ -72,12 +73,12 @@ if (isset($_POST['update_profile'])) {
             $message = "This email is already in use by another account.";
             $messageType = "error";
         } else {
-            // Update Base User Account Table
+            // Update user account
             mysqli_query($conn, "UPDATE user SET username = '$usernameSafe', email = '$emailSafe' WHERE id = $userID");
             $_SESSION['username'] = $username;
             $_SESSION['email'] = $email;
 
-            // Handle Profile Picture File Upload
+            // Handle image upload
             $picSQL = "";
             if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] === UPLOAD_ERR_OK) {
                 $fileTmp = $_FILES['profile_pic']['tmp_name'];
@@ -96,7 +97,7 @@ if (isset($_POST['update_profile'])) {
                 }
             }
 
-            // Upsert Dedicated user_profiles Table
+            // Upsert profile
             $profileUpdateSQL = "INSERT INTO user_profiles 
                 (user_id, designation, phone, location, bio, facebook, linkedin, twitter, github)
                 VALUES 
@@ -123,7 +124,7 @@ if (isset($_POST['update_profile'])) {
     }
 }
 
-// Fetch Fresh Joined User & Profile Data
+// Get user profile data
 $sql = "SELECT u.id, u.username, u.email, u.role,
                p.designation, p.phone, p.location, p.bio, p.profile_pic,
                p.facebook, p.linkedin, p.twitter, p.github
@@ -142,7 +143,7 @@ if (!$result || mysqli_num_rows($result) !== 1) {
 $user = mysqli_fetch_assoc($result);
 $_SESSION['profile_pic'] = $user['profile_pic'];
 
-// Fetch User's Published Blogs
+// Get user's blogs
 $blogsSQL = "SELECT * FROM blogpost WHERE user_id = $userID ORDER BY created_at DESC";
 $myBlogsRes = mysqli_query($conn, $blogsSQL);
 
@@ -196,10 +197,8 @@ $myBlogsRes = mysqli_query($conn, $blogsSQL);
         </div>
     <?php } ?>
 
-    <!-- Two-Column Layout Grid -->
     <div class="profile-layout-grid">
 
-        <!-- LEFT COLUMN: AUTHOR CARD & CONTACT DETAILS -->
         <aside class="author-profile-card">
 
             <?php echo renderUserAvatar($user['username'], $user['profile_pic'], 'author-avatar-badge'); ?>
@@ -211,7 +210,6 @@ $myBlogsRes = mysqli_query($conn, $blogsSQL);
                 </div>
             </div>
 
-            <!-- SOCIAL LINKS ROW -->
             <div class="social-icons-row">
                 <a href="<?php echo !empty($user['facebook']) ? htmlspecialchars($user['facebook']) : '#'; ?>" target="_blank" class="social-icon-btn" title="Facebook">
                     <i class="fa-brands fa-facebook-f" style="color:#1877f2;"></i>
@@ -227,7 +225,6 @@ $myBlogsRes = mysqli_query($conn, $blogsSQL);
                 </a>
             </div>
 
-            <!-- CONTACT DETAILS CARD -->
             <div class="contact-info-card">
                 <div class="info-item">
                     <div class="info-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
@@ -264,7 +261,6 @@ $myBlogsRes = mysqli_query($conn, $blogsSQL);
 
         </aside>
 
-        <!-- RIGHT COLUMN: ABOUT ME & EDIT FORM & PUBLISHED STORIES -->
         <section class="profile-content-card">
 
             <h2 class="section-header-title">ABOUT ME</h2>
@@ -279,7 +275,6 @@ $myBlogsRes = mysqli_query($conn, $blogsSQL);
                 ?>
             </p>
 
-            <!-- EDIT FORM SECTION (Togglable) -->
             <div class="profile-edit-section" id="editFormSection">
                 <h3 class="sub-section-title">Update Profile Details</h3>
 
@@ -348,7 +343,6 @@ $myBlogsRes = mysqli_query($conn, $blogsSQL);
                 </form>
             </div>
 
-            <!-- PUBLISHED BLOGS GRID -->
             <h3 class="sub-section-title">My Published Stories</h3>
 
             <div class="my-blogs-grid">

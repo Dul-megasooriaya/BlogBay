@@ -94,3 +94,34 @@
 </footer>
 
 <script src="js/search_highlight.js?v=<?php echo time(); ?>"></script>
+
+<?php if (empty($_COOKIE['blogbay_cookie_consent'])) { ?>
+<div class="cookie-banner-overlay" id="cookieBanner">
+    <div class="cookie-banner-card">
+        <div class="cookie-icon-wrapper">
+            <i class="fa-solid fa-cookie-bite"></i>
+        </div>
+        <div class="cookie-banner-content">
+            <h4>We value your privacy</h4>
+            <p>BlogBay uses cookies & sessions to personalize your experience, remember your preferences, and maintain secure login sessions.</p>
+        </div>
+        <div class="cookie-banner-actions">
+            <button type="button" class="cookie-btn cookie-btn-essential" onclick="setCookieConsent('essential')">Essential Only</button>
+            <button type="button" class="cookie-btn cookie-btn-accept" onclick="setCookieConsent('all')">Accept All Cookies</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function setCookieConsent(type) {
+    const d = new Date();
+    d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+    document.cookie = "blogbay_cookie_consent=" + type + ";expires=" + d.toUTCString() + ";path=/;SameSite=Lax";
+    const banner = document.getElementById("cookieBanner");
+    if (banner) {
+        banner.classList.add("cookie-banner-hidden");
+        setTimeout(() => { banner.remove(); }, 350);
+    }
+}
+</script>
+<?php } ?>

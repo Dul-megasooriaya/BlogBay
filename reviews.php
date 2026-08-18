@@ -1,14 +1,13 @@
 <?php
-
-session_start();
-
 include "config.php";
+include "includes/session_manager.php";
 include "site_config.php";
+
+checkRememberMeCookie($conn);
 
 $userID = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : 0;
 $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
 
-// Auto database migration for reviews and reactions
 mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `reviews` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `blog_id` INT NOT NULL,
@@ -32,7 +31,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'success') {
     $flashMsg = "Review published successfully!";
 }
 
-// Handle Form Submission for new review with Post-Redirect-Get pattern
 if (isset($_POST['submit_review'])) {
     if (!$userID) {
         header("Location: login.php");
@@ -52,7 +50,6 @@ if (isset($_POST['submit_review'])) {
     }
 }
 
-// Handle Reaction Toggle via AJAX or POST
 if (isset($_POST['action']) && $_POST['action'] === 'toggle_like') {
     if (!$userID) {
         echo json_encode(['success' => false, 'message' => 'login_required']);
@@ -71,7 +68,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'toggle_like') {
     $countData = mysqli_fetch_assoc($countRes);
     $totalLikes = (int)$countData['total'];
 
-    // Fetch likers details to generate updated social text & avatars
     $likersRes = mysqli_query($conn, "
         SELECT u.username, p.profile_pic 
         FROM blog_reactions br 
@@ -117,7 +113,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'toggle_like') {
     exit();
 }
 
-// Handle AJAX endpoint for editing a review (owner only)
 if (isset($_POST['action']) && $_POST['action'] === 'edit_review') {
     header('Content-Type: application/json');
     if (!$userID) {
@@ -130,7 +125,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'edit_review') {
 
     if ($reviewID > 0 && $rating >= 1 && $rating <= 5 && $reviewText !== "") {
         $reviewSafe = mysqli_real_escape_string($conn, $reviewText);
-        // Verify owner
         $check = mysqli_query($conn, "SELECT id, user_id FROM reviews WHERE id = $reviewID");
         if ($rRow = mysqli_fetch_assoc($check)) {
             if ((int)$rRow['user_id'] === (int)$userID) {
@@ -147,7 +141,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'edit_review') {
     exit();
 }
 
-// Handle AJAX endpoint for deleting a review (owner only)
 if (isset($_POST['action']) && $_POST['action'] === 'delete_review') {
     header('Content-Type: application/json');
     if (!$userID) {
@@ -156,7 +149,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete_review') {
     }
     $reviewID = (int)($_POST['review_id'] ?? 0);
     if ($reviewID > 0) {
-        // Verify owner
         $check = mysqli_query($conn, "SELECT id, user_id FROM reviews WHERE id = $reviewID");
         if ($rRow = mysqli_fetch_assoc($check)) {
             if ((int)$rRow['user_id'] === (int)$userID) {
@@ -173,7 +165,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete_review') {
     exit();
 }
 
-// Handle AJAX endpoint for fetching all reviews of a specific blog post
 if (isset($_GET['action']) && $_GET['action'] === 'get_blog_reviews') {
     header('Content-Type: application/json');
     $bId = (int)($_GET['blog_id'] ?? 0);
@@ -229,10 +220,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_blog_reviews') {
     exit();
 }
 
-// Fetch all blogs to allow selecting in review modal
 $allBlogsRes = mysqli_query($conn, "SELECT id, title FROM blogpost ORDER BY created_at DESC");
-
-// Fetch reviews grouped per blog post
 $querySQL = "SELECT 
                 b.id AS blog_id,
                 b.title AS blog_title,
@@ -327,7 +315,6 @@ $reviewsRes = mysqli_query($conn, $querySQL);
         </div>
     <?php } ?>
 
-    <!-- Reviews Grid Layout -->
     <div class="reviews-grid">
 
         <?php 
@@ -338,16 +325,14 @@ $reviewsRes = mysqli_query($conn, $querySQL);
                 $totalReviews = (int) $row['total_reviews'];
                 $likeCount = (int) $row['like_count'];
                 $userLiked = (int) $row['user_liked'] > 0;
-                $coverImg = !empty($row['blog_image']) ? 'uploads/' . $row['blog_image'] : 'images/logo.png';
+                $coverImg = (!empty($row['blog_image']) && file_exists(__DIR__ . '/uploads/' . $row['blog_image'])) ? 'uploads/' . $row['blog_image'] : 'images/logo.png';
         ?>
             <article class="review-card" data-genre="all">
 
-                <!-- Left: Cover Image -->
                 <div class="review-cover-wrapper">
                     <img src="<?php echo htmlspecialchars($coverImg); ?>" alt="<?php echo htmlspecialchars($row['blog_title']); ?>">
                 </div>
 
-                <!-- Right: Details -->
                 <div class="review-details">
 
                     <div class="review-header-info">
@@ -358,7 +343,6 @@ $reviewsRes = mysqli_query($conn, $querySQL);
                             by <?php echo htmlspecialchars($row['author_name']); ?>
                         </div>
 
-                        <!-- Overall Star Rating Row (Clickable to view all reviews) -->
                         <div class="star-rating-row" onclick="openAllReviewsModal(<?php echo (int)$row['blog_id']; ?>)" style="cursor:pointer;" title="Click to view all reviews">
                             <div class="stars">
                                 <?php for ($s = 1; $s <= 5; $s++) { ?>
@@ -383,11 +367,9 @@ $reviewsRes = mysqli_query($conn, $querySQL);
                         </p>
                     </div>
 
-                    <!-- Footer: Avatar Stack & Like Reaction Button -->
                     <div class="review-card-footer">
                         <div class="social-proof">
                             <?php 
-                            // Fetch up to 2 users who actually liked this blog post
                             $likersRes = mysqli_query($conn, "
                                 SELECT u.username, p.profile_pic 
                                 FROM blog_reactions br 
@@ -457,7 +439,6 @@ $reviewsRes = mysqli_query($conn, $querySQL);
 
 </div>
 
-<!-- WRITE REVIEW MODAL -->
 <div class="modal-overlay" id="reviewModal">
     <div class="modal-card">
         <div class="modal-header">
@@ -502,21 +483,18 @@ $reviewsRes = mysqli_query($conn, $querySQL);
     </div>
 </div>
 
-<!-- SEE ALL REVIEWS MODAL -->
 <div class="modal-overlay" id="allReviewsModal">
     <div class="modal-card reviews-list-modal">
         <div class="modal-header">
             <div>
                 <h2 id="modalBlogTitle" style="font-size:20px; margin-bottom:4px;">Blog Reviews</h2>
                 <div id="modalRatingSummary" style="font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px;">
-                    <!-- Dynamically populated -->
                 </div>
             </div>
             <button class="modal-close" onclick="closeAllReviewsModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="modal-body reviews-scroll-container" id="allReviewsList">
-            <!-- Dynamically populated via AJAX -->
         </div>
 
         <div class="modal-footer" style="margin-top:20px; padding-top:16px; border-top:1px solid #ebe8f2; display:flex; justify-content:space-between; align-items:center;">
@@ -539,7 +517,6 @@ function closeModal() {
     document.getElementById("reviewModal").classList.remove("open");
 }
 
-// Interactive Star Selector
 const stars = document.querySelectorAll("#starPicker i");
 const ratingInput = document.getElementById("ratingInput");
 
@@ -557,7 +534,6 @@ stars.forEach((star, idx) => {
     });
 });
 
-// Interactive Real-Time Like Reaction
 function toggleLike(blogId, btn) {
     const formData = new FormData();
     formData.append("action", "toggle_like");
@@ -582,7 +558,6 @@ function toggleLike(blogId, btn) {
                 icon.className = "fa-regular fa-heart";
             }
 
-            // Update social proof text and avatar stack dynamically
             const footer = btn.closest(".review-card-footer");
             if (footer) {
                 const socialTextEl = footer.querySelector(".social-text");
@@ -601,7 +576,6 @@ function toggleLike(blogId, btn) {
     .catch(err => console.error(err));
 }
 
-// Open All Reviews Modal for a Blog
 function openAllReviewsModal(blogId) {
     const modal = document.getElementById("allReviewsModal");
     const titleEl = document.getElementById("modalBlogTitle");
@@ -613,7 +587,6 @@ function openAllReviewsModal(blogId) {
     listEl.innerHTML = '<div style="text-align:center; padding:30px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:24px; color:var(--purple);"></i><p style="margin-top:10px; font-size:13px; color:var(--muted);">Loading reviews...</p></div>';
     modal.classList.add("open");
 
-    // Pre-select this blog in the Write Review modal dropdown as well
     const selectEl = document.getElementById("blog_id");
     if (selectEl) {
         selectEl.value = blogId;
@@ -716,7 +689,6 @@ function startEditReview(reviewId, currentRating, currentText, blogId) {
         </div>
     `;
 
-    // Star picker handler for inline edit
     const editStars = editBox.querySelectorAll(`#editStarPicker-${reviewId} i`);
     const ratingInput = document.getElementById(`editRatingInput-${reviewId}`);
     editStars.forEach((star, idx) => {

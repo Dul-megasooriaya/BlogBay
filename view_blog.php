@@ -1,12 +1,11 @@
 <?php
-
-session_start();
-
 include "config.php";
+include "includes/session_manager.php";
 include "site_config.php";
 
-if(!isset($_GET['id']) || !is_numeric($_GET['id']))
-{
+checkRememberMeCookie($conn);
+
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: login.php");
     exit();
 }
@@ -22,51 +21,29 @@ $sql = "SELECT blogpost.*, user.username, p.profile_pic
 
 $result = mysqli_query($conn, $sql);
 
-if(!$result || mysqli_num_rows($result) !== 1)
-{
+if (!$result || mysqli_num_rows($result) !== 1) {
     header("Location: login.php");
     exit();
 }
 
 $blog = mysqli_fetch_assoc($result);
 
-$isOwner =
-    isset($_SESSION['user_id']) &&
-    (int) $_SESSION['user_id'] === (int) $blog['user_id'];
-
-$backPage =
-    isset($_SESSION['user_id'])
-        ? "dashboard.php"
-        : "login.php";
-
+$isOwner = isset($_SESSION['user_id']) && (int) $_SESSION['user_id'] === (int) $blog['user_id'];
+$backPage = isset($_SESSION['user_id']) ? "dashboard.php" : "login.php";
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($blog['title']); ?> | <?php echo htmlspecialchars($siteName); ?></title>
 
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>
-    <?php echo htmlspecialchars($blog['title']); ?>
-    | <?php echo htmlspecialchars($siteName); ?>
-</title>
-
-<link rel="stylesheet"
-href="css/view_blog.css?v=10">
-
-<link rel="stylesheet"
-href="css/footer.css?v=3">
-
-<link rel="stylesheet"
-href="css/responsive.css?v=<?php echo time(); ?>">
-
+    <link rel="stylesheet" href="css/view_blog.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/footer.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/responsive.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
-
 <body>
 
 <header class="hero-navbar">
@@ -99,136 +76,49 @@ href="css/responsive.css?v=<?php echo time(); ?>">
 
 <main class="article-wrapper">
 
-    <a href="<?php echo $backPage; ?>"
-       class="back-link">
-
+    <a href="<?php echo $backPage; ?>" class="back-link">
         ← Back to blogs
-
     </a>
 
     <article class="article-card">
 
         <header class="article-header">
-
-            <h1>
-                <?php echo htmlspecialchars($blog['title']); ?>
-            </h1>
+            <h1><?php echo htmlspecialchars($blog['title']); ?></h1>
 
             <div class="author-row">
-
                 <?php echo renderUserAvatar($blog['username'], $blog['profile_pic'] ?? null, 'author-avatar'); ?>
-
                 <div class="author-details">
-
-                    <strong>
-                        <?php
-                        echo htmlspecialchars(
-                            $blog['username']
-                        );
-                        ?>
-                    </strong>
-
-                    <span>
-                        Published on
-                        <?php
-                        echo date(
-                            "F d, Y",
-                            strtotime($blog['created_at'])
-                        );
-                        ?>
-                    </span>
-
-                    <?php
-                    if(
-                        !empty($blog['updated_at']) &&
-                        $blog['updated_at'] !== $blog['created_at']
-                    )
-                    {
-                    ?>
-
-                        <span>
-                            Updated on
-                            <?php
-                            echo date(
-                                "F d, Y",
-                                strtotime($blog['updated_at'])
-                            );
-                            ?>
-                        </span>
-
+                    <strong><?php echo htmlspecialchars($blog['username']); ?></strong>
+                    <span>Published on <?php echo date("F d, Y", strtotime($blog['created_at'])); ?></span>
+                    <?php if (!empty($blog['updated_at']) && $blog['updated_at'] !== $blog['created_at']) { ?>
+                        <span>Updated on <?php echo date("F d, Y", strtotime($blog['updated_at'])); ?></span>
                     <?php } ?>
-
                 </div>
-
             </div>
-
         </header>
 
-        <?php if(!empty($blog['image'])) { ?>
-
+        <?php if (!empty($blog['image']) && file_exists(__DIR__ . '/uploads/' . $blog['image'])) { ?>
             <div class="cover-wrapper">
-
-                <img
-                    src="uploads/<?php
-                    echo htmlspecialchars($blog['image']);
-                    ?>"
-                    alt="<?php
-                    echo htmlspecialchars($blog['title']);
-                    ?>"
-                    class="cover-image"
-                >
-
+                <img src="uploads/<?php echo htmlspecialchars($blog['image']); ?>" alt="<?php echo htmlspecialchars($blog['title']); ?>" class="cover-image">
             </div>
-
         <?php } ?>
 
         <section class="article-content">
-
-            <?php
-            echo nl2br(
-                htmlspecialchars($blog['content'])
-            );
-            ?>
-
+            <?php echo nl2br(htmlspecialchars($blog['content'])); ?>
         </section>
 
-        <?php if($isOwner) { ?>
-
+        <?php if ($isOwner) { ?>
             <div class="article-actions">
-
-                <a
-                    href="edit_blog.php?id=<?php
-                    echo (int) $blog['id'];
-                    ?>"
-                    class="edit-btn">
-
-                    Edit Blog
-
-                </a>
-
-                <a
-                    href="delete_blog.php?id=<?php
-                    echo (int) $blog['id'];
-                    ?>"
-                    class="delete-btn"
-                    onclick="return confirm('Are you sure you want to delete this blog?')">
-
-                    Delete Blog
-
-                </a>
-
+                <a href="edit_blog.php?id=<?php echo (int) $blog['id']; ?>" class="edit-btn">Edit Blog</a>
+                <a href="delete_blog.php?id=<?php echo (int) $blog['id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this blog?')">Delete Blog</a>
             </div>
-
         <?php } ?>
 
     </article>
-
-
 
 </main>
 
 <?php include "includes/footer.php"; ?>
 
 </body>
-
 </html>

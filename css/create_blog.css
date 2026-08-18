@@ -675,19 +675,57 @@ textarea:focus{
     box-shadow: 0 10px 24px rgba(147, 104, 184, 0.15);
 }
 
-.sticky-note-card.theme-purple {
-    background: linear-gradient(135deg, rgba(147, 104, 184, 0.15) 0%, rgba(147, 104, 184, 0.06) 100%);
-    border: 1px solid rgba(147, 104, 184, 0.35);
+/* Real Solid Post-It Color Pack Themes */
+.sticky-note-card.theme-yellow,
+.sticky-note-card.note-theme-yellow {
+    background: #ffef75 !important;
+    border: 1px solid #e8cb28 !important;
+    color: #3b3200 !important;
+    box-shadow: 0 6px 16px rgba(255, 239, 117, 0.4) !important;
 }
 
+.sticky-note-card.theme-pink,
+.sticky-note-card.note-theme-pink,
 .sticky-note-card.theme-magenta {
-    background: linear-gradient(135deg, rgba(171, 59, 157, 0.15) 0%, rgba(171, 59, 157, 0.06) 100%);
-    border: 1px solid rgba(171, 59, 157, 0.35);
+    background: #ff7eb9 !important;
+    border: 1px solid #f4569c !important;
+    color: #4a0322 !important;
+    box-shadow: 0 6px 16px rgba(255, 126, 185, 0.4) !important;
 }
 
+.sticky-note-card.theme-green,
+.sticky-note-card.note-theme-mint,
+.sticky-note-card.note-theme-green {
+    background: #7afcff !important;
+    border: 1px solid #48e5e8 !important;
+    color: #00383a !important;
+    box-shadow: 0 6px 16px rgba(122, 252, 255, 0.4) !important;
+}
+
+.sticky-note-card.theme-blue,
+.sticky-note-card.note-theme-blue,
 .sticky-note-card.theme-cyan {
-    background: linear-gradient(135deg, rgba(114, 214, 216, 0.25) 0%, rgba(114, 214, 216, 0.08) 100%);
-    border: 1px solid rgba(114, 214, 216, 0.45);
+    background: #70d6ff !important;
+    border: 1px solid #3cbbe8 !important;
+    color: #002e47 !important;
+    box-shadow: 0 6px 16px rgba(112, 214, 255, 0.4) !important;
+}
+
+.sticky-note-card.theme-orange,
+.sticky-note-card.note-theme-peach,
+.sticky-note-card.note-theme-orange {
+    background: #ff9e9e !important;
+    border: 1px solid #f57878 !important;
+    color: #4a0e0e !important;
+    box-shadow: 0 6px 16px rgba(255, 158, 158, 0.4) !important;
+}
+
+.sticky-note-card.theme-purple,
+.sticky-note-card.note-theme-purple {
+    background: #d8b4fe !important;
+    border: 1px solid #be8cf7 !important;
+    color: #2c0a4d !important;
+    box-shadow: 0 6px 16px rgba(216, 180, 254, 0.4) !important;
 }
 
 .sticky-card-header {

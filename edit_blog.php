@@ -1,176 +1,112 @@
 <?php
-
-session_start();
 include "config.php";
+include "includes/session_manager.php";
 include "site_config.php";
 
-if(!isset($_SESSION['user_id']))
-{
+// Check session
+checkRememberMeCookie($conn);
+
+if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-if(!isset($_SESSION['profile_pic']))
-{
+if (!isset($_SESSION['profile_pic'])) {
     $_SESSION['profile_pic'] = getUserProfilePic($conn, (int)$_SESSION['user_id']);
 }
 
-if(!isset($_GET['id']) || !is_numeric($_GET['id']))
-{
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: dashboard.php");
     exit();
 }
 
 $blogID = (int) $_GET['id'];
-$userID = $_SESSION['user_id'];
+$userID = (int) $_SESSION['user_id'];
 $message = "";
 
-$sql = "SELECT * FROM blogpost
-        WHERE id = $blogID
-        AND user_id = $userID";
-
+// Get blog post
+$sql = "SELECT * FROM blogpost WHERE id = $blogID AND user_id = $userID";
 $result = mysqli_query($conn, $sql);
 
-if(mysqli_num_rows($result) !== 1)
-{
+if (mysqli_num_rows($result) !== 1) {
     die("Access denied or blog not found.");
 }
 
 $blog = mysqli_fetch_assoc($result);
 
-if(isset($_POST['update']))
-{
+// Save updates
+if (isset($_POST['update'])) {
     $title = trim($_POST['title']);
     $content = trim($_POST['content']);
 
-    if(empty($title) || empty($content))
-    {
+    if (empty($title) || empty($content)) {
         $message = "Please complete all required fields.";
-    }
-    else
-    {
+    } else {
         $titleSafe = mysqli_real_escape_string($conn, $title);
         $contentSafe = mysqli_real_escape_string($conn, $content);
-
         $imageName = $blog['image'];
 
-        if(
-            isset($_FILES['image']) &&
-            $_FILES['image']['error'] === 0
-        )
-        {
-            $allowedTypes = [
-                'image/jpeg',
-                'image/png',
-                'image/webp'
-            ];
-
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
             $fileType = $_FILES['image']['type'];
             $fileSize = $_FILES['image']['size'];
 
-            if(!in_array($fileType, $allowedTypes))
-            {
+            if (!in_array($fileType, $allowedTypes, true)) {
                 $message = "Only JPG, PNG and WEBP images are allowed.";
-            }
-            elseif($fileSize > 5 * 1024 * 1024)
-            {
+            } elseif ($fileSize > 5 * 1024 * 1024) {
                 $message = "The image must be smaller than 5MB.";
-            }
-            else
-            {
-                $extension = strtolower(
-                    pathinfo(
-                        $_FILES['image']['name'],
-                        PATHINFO_EXTENSION
-                    )
-                );
-
-                $newImageName =
-                    uniqid("blog_", true) . "." . $extension;
-
+            } else {
+                $extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                $newImageName = uniqid("blog_", true) . "." . $extension;
                 $uploadPath = "uploads/" . $newImageName;
 
-                if(
-                    move_uploaded_file(
-                        $_FILES['image']['tmp_name'],
-                        $uploadPath
-                    )
-                )
-                {
-                    if(
-                        !empty($blog['image']) &&
-                        file_exists("uploads/" . $blog['image'])
-                    )
-                    {
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
+                    if (!empty($blog['image']) && file_exists("uploads/" . $blog['image'])) {
                         unlink("uploads/" . $blog['image']);
                     }
-
                     $imageName = $newImageName;
-                }
-                else
-                {
+                } else {
                     $message = "The new image could not be uploaded.";
                 }
             }
         }
 
-        if($message === "")
-        {
-            $imageSafe = mysqli_real_escape_string(
-                $conn,
-                $imageName
-            );
+        if ($message === "") {
+            $imageSafe = mysqli_real_escape_string($conn, $imageName);
 
-            $updateSQL = "UPDATE blogpost
-                          SET title = '$titleSafe',
-                              content = '$contentSafe',
-                              image = '$imageSafe'
-                          WHERE id = $blogID
-                          AND user_id = $userID";
+            $updateSQL = "UPDATE blogpost SET title = '$titleSafe', content = '$contentSafe', image = '$imageSafe' WHERE id = $blogID AND user_id = $userID";
 
-            if(mysqli_query($conn, $updateSQL))
-            {
-                header(
-                    "Location: view_blog.php?id=" . $blogID
-                );
+            if (mysqli_query($conn, $updateSQL)) {
+                header("Location: view_blog.php?id=" . $blogID);
                 exit();
-            }
-            else
-            {
+            } else {
                 $message = "Failed to update the blog.";
             }
         }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Blog | <?php echo htmlspecialchars($siteName); ?></title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/create_blog.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/edit_blog.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/footer.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/responsive.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-<title>Edit Blog | <?php echo htmlspecialchars($siteName); ?></title>
-
-<link rel="stylesheet" href="css/create_blog.css?v=<?php echo time(); ?>">
-<link rel="stylesheet" href="css/edit_blog.css?v=<?php echo time(); ?>">
-<link rel="stylesheet" href="css/footer.css?v=<?php echo time(); ?>">
-<link rel="stylesheet" href="css/responsive.css?v=<?php echo time(); ?>">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
-<script>
-    window.CURRENT_USER_ID = "<?php echo (int)$_SESSION['user_id']; ?>";
-</script>
-
+    <script>
+        window.CURRENT_USER_ID = "<?php echo (int)$_SESSION['user_id']; ?>";
+    </script>
 </head>
-
 <body>
 
+<?php // Navigation ?>
 <header class="hero-navbar hero-navbar-solid">
     <div class="hero-navbar-inner">
         <a href="dashboard.php" class="hero-brand">
@@ -199,228 +135,106 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     </div>
 </header>
 
+<?php // Main layout ?>
 <main class="page-wrapper">
 
+    <?php // Header title ?>
     <div class="editor-header-plain">
-
-        <h1>
-            Edit your story
-        </h1>
-
+        <h1>Edit your story</h1>
         <div class="author-card">
-
             <?php echo renderUserAvatar($_SESSION['username'], $_SESSION['profile_pic'] ?? null, 'author-avatar'); ?>
-
             <div>
-
                 <span>Editing as</span>
-
-                <strong>
-                    <?php
-                    echo htmlspecialchars(
-                        $_SESSION['username']
-                    );
-                    ?>
-                </strong>
-
+                <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
             </div>
-
         </div>
-
     </div>
 
-    <?php if($message !== "") { ?>
-
+    <?php if ($message !== "") { ?>
         <div class="alert">
-
             <i class="fa-solid fa-circle-exclamation"></i>
-
             <?php echo htmlspecialchars($message); ?>
-
         </div>
-
     <?php } ?>
 
-    <!-- Single Column Full-Width Edit Form -->
-    <form
-        method="POST"
-        enctype="multipart/form-data"
-        class="editor-form">
-
-        <!-- Unified Purple Section Card -->
+    <?php // Edit form ?>
+    <form method="POST" enctype="multipart/form-data" class="editor-form">
         <section class="editor-card unified-editor-card">
-
             <div class="section-heading">
-
                 <h2>Blog Details & Content</h2>
-
-                <p>
-                    Update your title, replace your cover image, and revise your story below.
-                </p>
-
+                <p>Update your title, replace your cover image, and revise your story below.</p>
             </div>
 
             <div class="form-group">
-
-                <label for="title">
-                    Blog title
-                    <span>*</span>
-                </label>
-
-                <input
-                    id="title"
-                    type="text"
-                    name="title"
-                    maxlength="255"
-                    value="<?php
-                    echo htmlspecialchars($blog['title']);
-                    ?>"
-                    required
-                >
-
+                <label for="title">Blog title <span>*</span></label>
+                <input id="title" type="text" name="title" maxlength="255" value="<?php echo htmlspecialchars($blog['title']); ?>" required>
                 <div class="field-info">
                     <span>Use a short and descriptive title.</span>
                     <span id="titleCount">0 / 255</span>
                 </div>
-
             </div>
 
             <div class="form-group">
-
-                <label>
-                    Featured image
-                </label>
-
-                <?php if(!empty($blog['image'])) { ?>
-
+                <label>Featured image</label>
+                <?php if (!empty($blog['image'])) { ?>
                     <div class="current-image-wrapper" style="margin-bottom:14px;">
-
-                        <img
-                            src="uploads/<?php
-                            echo htmlspecialchars(
-                                $blog['image']
-                            );
-                            ?>"
-                            alt="Current featured image"
-                            class="current-image"
-                            style="max-height:220px; width:100%; border-radius:16px; object-fit:cover; border:1px solid rgba(255,255,255,0.3);"
-                        >
-
+                        <img src="uploads/<?php echo htmlspecialchars($blog['image']); ?>" alt="Current featured image" class="current-image" style="max-height:220px; width:100%; border-radius:16px; object-fit:cover; border:1px solid rgba(255,255,255,0.3);">
                     </div>
-
                 <?php } ?>
 
                 <label for="image" class="upload-box">
-
-                    <input
-                        id="image"
-                        type="file"
-                        name="image"
-                        accept=".jpg,.jpeg,.png,.webp"
-                    >
-
+                    <input id="image" type="file" name="image" accept=".jpg,.jpeg,.png,.webp">
                     <div id="uploadPrompt" class="upload-prompt">
-
                         <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-
                         <h3>Choose a new cover image</h3>
-
-                        <p>
-                            Leave this empty to keep the current image.
-                        </p>
-
-                        <small>
-                            JPG, PNG or WEBP · Maximum 5MB
-                        </small>
-
+                        <p>Leave this empty to keep the current image.</p>
+                        <small>JPG, PNG or WEBP · Maximum 5MB</small>
                     </div>
-
-                    <img
-                        id="imagePreview"
-                        class="image-preview"
-                        alt="New featured image preview"
-                    >
-
+                    <img id="imagePreview" class="image-preview" alt="New featured image preview">
                 </label>
-
             </div>
 
             <div class="form-group">
-
-                <label for="content">
-                    Your story
-                    <span>*</span>
-                </label>
-
-                <textarea
-                    id="content"
-                    name="content"
-                    rows="16"
-                    required
-                ><?php
-                echo htmlspecialchars($blog['content']);
-                ?></textarea>
-
+                <label for="content">Your story <span>*</span></label>
+                <textarea id="content" name="content" rows="16" required><?php echo htmlspecialchars($blog['content']); ?></textarea>
                 <div class="field-info">
                     <span>Your line breaks will be preserved.</span>
                     <span id="contentCount">0 characters</span>
                 </div>
-
             </div>
-
         </section>
 
         <div class="form-actions">
-
-            <a
-                href="view_blog.php?id=<?php echo $blogID; ?>"
-                class="cancel-btn">
-
-                Cancel
-
-            </a>
-
-            <button
-                type="submit"
-                name="update"
-                class="update-btn">
-
-                <i class="fa-solid fa-floppy-disk"></i>
-                Save Changes
-
+            <a href="view_blog.php?id=<?php echo $blogID; ?>" class="cancel-btn">Cancel</a>
+            <button type="submit" name="update" class="update-btn">
+                <i class="fa-solid fa-floppy-disk"></i> Save Changes
             </button>
-
         </div>
-
     </form>
 
 </main>
 
-<script>
+<?php include "includes/footer.php"; ?>
 
+<!-- Page scripts -->
+<script>
 const titleInput = document.getElementById("title");
 const titleCount = document.getElementById("titleCount");
-
 const contentInput = document.getElementById("content");
 const contentCount = document.getElementById("contentCount");
-
 const imageInput = document.getElementById("image");
 const imagePreview = document.getElementById("imagePreview");
 const uploadPrompt = document.getElementById("uploadPrompt");
 
-function updateTitleCount()
-{
+function updateTitleCount() {
     if (titleInput && titleCount) {
-        titleCount.textContent =
-            titleInput.value.length + " / 255";
+        titleCount.textContent = titleInput.value.length + " / 255";
     }
 }
 
-function updateContentCount()
-{
+function updateContentCount() {
     if (contentInput && contentCount) {
-        contentCount.textContent =
-            contentInput.value.length + " characters";
+        contentCount.textContent = contentInput.value.length + " characters";
     }
 }
 
@@ -452,11 +266,7 @@ if (imageInput) {
         }
     });
 }
-
 </script>
 
-<?php include "includes/footer.php"; ?>
-
 </body>
-
 </html>

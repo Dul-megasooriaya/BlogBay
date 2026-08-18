@@ -1,18 +1,17 @@
 <?php
-
-session_start();
-
 include "config.php";
+include "includes/session_manager.php";
 include "site_config.php";
 
-if(!isset($_SESSION['user_id']))
-{
+// Verify persistent remember cookie & session authentication
+checkRememberMeCookie($conn);
+
+if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-if(!isset($_SESSION['profile_pic']))
-{
+if (!isset($_SESSION['profile_pic'])) {
     $_SESSION['profile_pic'] = getUserProfilePic($conn, (int)$_SESSION['user_id']);
 }
 
@@ -21,146 +20,68 @@ $createdSuccess = false;
 $createdBlogID = 0;
 $createdBlogTitle = "";
 
-if(isset($_POST['publish']))
-{
+// Process blog creation submission
+if (isset($_POST['publish'])) {
     $title = trim($_POST['title']);
     $content = trim($_POST['content']);
     $userID = (int) $_SESSION['user_id'];
 
-    if($title === "" || $content === "")
-    {
+    if ($title === "" || $content === "") {
         $message = "Please complete all required fields.";
-    }
-    elseif(
-        !isset($_FILES['image']) ||
-        $_FILES['image']['error'] !== UPLOAD_ERR_OK
-    )
-    {
+    } elseif (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
         $message = "Please select a featured image.";
-    }
-    else
-    {
-        $allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-        ];
-
-        $fileType = mime_content_type(
-            $_FILES['image']['tmp_name']
-        );
-
+    } else {
+        $allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+        $fileType = mime_content_type($_FILES['image']['tmp_name']);
         $fileSize = $_FILES['image']['size'];
 
-        if(!in_array($fileType, $allowedTypes, true))
-        {
+        if (!in_array($fileType, $allowedTypes, true)) {
             $message = "Only JPG, PNG and WEBP images are allowed.";
-        }
-        elseif($fileSize > 5 * 1024 * 1024)
-        {
+        } elseif ($fileSize > 5 * 1024 * 1024) {
             $message = "The image must be smaller than 5MB.";
-        }
-        else
-        {
-            $extension = strtolower(
-                pathinfo(
-                    $_FILES['image']['name'],
-                    PATHINFO_EXTENSION
-                )
-            );
+        } else {
+            $extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            $imageName = uniqid("blog_", true) . "." . $extension;
+            $uploadPath = __DIR__ . "/uploads/" . $imageName;
 
-            $imageName =
-                uniqid("blog_", true) . "." . $extension;
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
+                $titleSafe = mysqli_real_escape_string($conn, $title);
+                $contentSafe = mysqli_real_escape_string($conn, $content);
+                $imageSafe = mysqli_real_escape_string($conn, $imageName);
 
-            $uploadPath =
-                __DIR__ . "/uploads/" . $imageName;
+                $sql = "INSERT INTO blogpost (user_id, title, content, image) VALUES ($userID, '$titleSafe', '$contentSafe', '$imageSafe')";
 
-            if(
-                move_uploaded_file(
-                    $_FILES['image']['tmp_name'],
-                    $uploadPath
-                )
-            )
-            {
-                $titleSafe =
-                    mysqli_real_escape_string(
-                        $conn,
-                        $title
-                    );
-
-                $contentSafe =
-                    mysqli_real_escape_string(
-                        $conn,
-                        $content
-                    );
-
-                $imageSafe =
-                    mysqli_real_escape_string(
-                        $conn,
-                        $imageName
-                    );
-
-                $sql = "INSERT INTO blogpost
-                        (user_id, title, content, image)
-                        VALUES
-                        (
-                            $userID,
-                            '$titleSafe',
-                            '$contentSafe',
-                            '$imageSafe'
-                        )";
-
-                if(mysqli_query($conn, $sql))
-                {
+                if (mysqli_query($conn, $sql)) {
                     $createdBlogID = mysqli_insert_id($conn);
                     $createdBlogTitle = $title;
                     $createdSuccess = true;
-                }
-                else
-                {
+                } else {
                     $message = "The blog could not be published.";
                 }
-            }
-            else
-            {
+            } else {
                 $message = "The image could not be uploaded.";
             }
         }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Blog | <?php echo htmlspecialchars($siteName); ?></title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>
-        Create Blog | <?php echo htmlspecialchars($siteName); ?>
-    </title>
-
-    <link rel="stylesheet"
-          href="css/create_blog.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet"
-          href="css/footer.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet"
-          href="css/responsive.css?v=<?php echo time(); ?>">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="css/create_blog.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/footer.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/responsive.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
     <script>
         window.CURRENT_USER_ID = "<?php echo (int)$_SESSION['user_id']; ?>";
     </script>
-
 </head>
-
 <body>
 
 <header class="hero-navbar hero-navbar-solid">
@@ -194,216 +115,76 @@ if(isset($_POST['publish']))
 <main class="page-wrapper">
 
     <div class="editor-header-plain">
-
-        <h1>
-            Write something new
-        </h1>
-
+        <h1>Write something new</h1>
         <div class="author-card">
-
             <?php echo renderUserAvatar($_SESSION['username'], $_SESSION['profile_pic'] ?? null, 'author-avatar'); ?>
-
             <div>
-
                 <span>Publishing as</span>
-
-                <strong>
-                    <?php
-                    echo htmlspecialchars(
-                        $_SESSION['username']
-                    );
-                    ?>
-                </strong>
-
+                <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
             </div>
-
         </div>
-
     </div>
 
-    <?php if($message !== "") { ?>
-
+    <?php if ($message !== "") { ?>
         <div class="alert">
-
             <i class="fa-solid fa-circle-exclamation"></i> <?php echo htmlspecialchars($message); ?>
-
         </div>
-
     <?php } ?>
 
-    <!-- Two Column Layout: Main Editor Left, Sidebar Right -->
     <div class="create-layout-grid">
 
-        <!-- LEFT COLUMN: MAIN FORM -->
         <div class="create-main-col">
-
-            <form method="POST"
-                  enctype="multipart/form-data"
-                  class="editor-form">
-
+            <form method="POST" enctype="multipart/form-data" class="editor-form">
                 <section class="editor-card unified-editor-card">
-
                     <div class="section-heading">
-
                         <h2>Blog Details & Content</h2>
-
-                        <p>
-                            Add a title, upload a featured cover image, and write your story below.
-                        </p>
-
+                        <p>Add a title, upload a featured cover image, and write your story below.</p>
                     </div>
 
                     <div class="form-group">
-
-                        <label for="title">
-
-                            Blog title
-                            <span>*</span>
-
-                        </label>
-
-                        <input
-                            id="title"
-                            type="text"
-                            name="title"
-                            maxlength="255"
-                            placeholder="Enter an engaging blog title"
-                            value="<?php
-                            echo isset($_POST['title'])
-                                ? htmlspecialchars($_POST['title'])
-                                : '';
-                            ?>"
-                            required
-                        >
-
+                        <label for="title">Blog title <span>*</span></label>
+                        <input id="title" type="text" name="title" maxlength="255" placeholder="Enter an engaging blog title" value="<?php echo isset($_POST['title']) ? htmlspecialchars($_POST['title']) : ''; ?>" required>
                         <div class="field-info">
-
-                            <span>
-                                Keep your title clear and descriptive.
-                            </span>
-
-                            <span id="titleCount">
-                                0 / 255
-                            </span>
-
+                            <span>Keep your title clear and descriptive.</span>
+                            <span id="titleCount">0 / 255</span>
                         </div>
-
                     </div>
 
                     <div class="form-group">
-
-                        <label>
-
-                            Featured image
-                            <span>*</span>
-
-                        </label>
-
-                        <label for="image"
-                               class="upload-box">
-
-                            <input
-                                id="image"
-                                type="file"
-                                name="image"
-                                accept=".jpg,.jpeg,.png,.webp"
-                                required
-                            >
-
-                            <div id="uploadPrompt"
-                                 class="upload-prompt">
-
+                        <label>Featured image <span>*</span></label>
+                        <label for="image" class="upload-box">
+                            <input id="image" type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
+                            <div id="uploadPrompt" class="upload-prompt">
                                 <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-
-                                <h3>
-                                    Choose a cover image
-                                </h3>
-
-                                <p>
-                                    Click this area to select an image.
-                                </p>
-
-                                <small>
-                                    JPG, PNG or WEBP · Maximum 5MB
-                                </small>
-
+                                <h3>Choose a cover image</h3>
+                                <p>Click this area to select an image.</p>
+                                <small>JPG, PNG or WEBP · Maximum 5MB</small>
                             </div>
-
-                            <img
-                                id="imagePreview"
-                                class="image-preview"
-                                alt="Featured image preview"
-                            >
-
+                            <img id="imagePreview" class="image-preview" alt="Featured image preview">
                         </label>
-
                     </div>
 
                     <div class="form-group">
-
-                        <label for="content">
-
-                            Your story
-                            <span>*</span>
-
-                        </label>
-
-                        <textarea
-                            id="content"
-                            name="content"
-                            rows="16"
-                            placeholder="Start writing your story..."
-                            required
-                        ><?php
-                        echo isset($_POST['content'])
-                            ? htmlspecialchars($_POST['content'])
-                            : '';
-                        ?></textarea>
-
+                        <label for="content">Your story <span>*</span></label>
+                        <textarea id="content" name="content" rows="16" placeholder="Start writing your story..." required><?php echo isset($_POST['content']) ? htmlspecialchars($_POST['content']) : ''; ?></textarea>
                         <div class="field-info">
-
-                            <span>
-                                Your line breaks will be preserved.
-                            </span>
-
-                            <span id="contentCount">
-                                0 characters
-                            </span>
-
+                            <span>Your line breaks will be preserved.</span>
+                            <span id="contentCount">0 characters</span>
                         </div>
-
                     </div>
-
                 </section>
 
                 <div class="form-actions">
-
-                    <a href="dashboard.php"
-                       class="cancel-btn">
-
-                        Cancel
-
-                    </a>
-
-                    <button
-                        type="submit"
-                        name="publish"
-                        class="publish-btn">
-
+                    <a href="dashboard.php" class="cancel-btn">Cancel</a>
+                    <button type="submit" name="publish" class="publish-btn">
                         <i class="fa-solid fa-paper-plane"></i> Publish Blog
-
                     </button>
-
                 </div>
-
             </form>
-
         </div>
 
-        <!-- RIGHT COLUMN: PURPLE GLASS SIDEBAR WIDGETS -->
         <aside class="create-sidebar-col">
 
-            <!-- 1. CLOCK WIDGET -->
             <div class="widget-card clock-widget">
                 <div class="clock-display-box">
                     <span id="clockTime" class="clock-time">00:00</span>
@@ -414,27 +195,18 @@ if(isset($_POST['publish']))
                 </div>
             </div>
 
-            <!-- 2. CALENDAR WIDGET -->
             <div class="widget-card calendar-widget">
                 <div class="calendar-header">
                     <span id="calMonthNum" class="cal-month-num">8</span>
                     <span class="cal-title">CALENDAR</span>
                 </div>
                 <div class="calendar-days-bar">
-                    <span>Sun</span>
-                    <span>Mon</span>
-                    <span>Tues</span>
-                    <span>Wed</span>
-                    <span>Thur</span>
-                    <span>Fri</span>
-                    <span>Sat</span>
+                    <span>Sun</span><span>Mon</span><span>Tues</span><span>Wed</span><span>Thur</span><span>Fri</span><span>Sat</span>
                 </div>
                 <div id="calendarGrid" class="calendar-grid">
-                    <!-- Calendar days dynamically rendered by JavaScript -->
                 </div>
             </div>
 
-            <!-- 3. INTERACTIVE STICKY NOTES WIDGET -->
             <div class="widget-card notes-widget">
                 <div class="notes-header">
                     <div class="notes-header-left">
@@ -448,8 +220,17 @@ if(isset($_POST['publish']))
 
                 <p class="sticky-hint">Click any note to type. Changes save automatically.</p>
 
+                <div class="sticky-color-palette" id="stickyColorPalette" style="display:flex; align-items:center; gap:8px; margin-bottom:14px; padding:8px 12px; background:rgba(248, 246, 252, 0.7); border-radius:12px;">
+                    <span class="palette-label" style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Pack:</span>
+                    <button type="button" class="color-pill active" data-color="theme-yellow" style="width:22px; height:22px; border-radius:50%; background:#ffef75; border:1px solid #e8cb28; cursor:pointer;" onclick="selectStickyTheme('theme-yellow', this)" title="Classic Yellow"></button>
+                    <button type="button" class="color-pill" data-color="theme-purple" style="width:22px; height:22px; border-radius:50%; background:#d8b4fe; border:1px solid #be8cf7; cursor:pointer;" onclick="selectStickyTheme('theme-purple', this)" title="Rich Lavender"></button>
+                    <button type="button" class="color-pill" data-color="theme-green" style="width:22px; height:22px; border-radius:50%; background:#7afcff; border:1px solid #48e5e8; cursor:pointer;" onclick="selectStickyTheme('theme-green', this)" title="Electric Mint"></button>
+                    <button type="button" class="color-pill" data-color="theme-blue" style="width:22px; height:22px; border-radius:50%; background:#70d6ff; border:1px solid #3cbbe8; cursor:pointer;" onclick="selectStickyTheme('theme-blue', this)" title="Sky Blue"></button>
+                    <button type="button" class="color-pill" data-color="theme-orange" style="width:22px; height:22px; border-radius:50%; background:#ff9e9e; border:1px solid #f57878; cursor:pointer;" onclick="selectStickyTheme('theme-orange', this)" title="Coral Orange"></button>
+                    <button type="button" class="color-pill" data-color="theme-pink" style="width:22px; height:22px; border-radius:50%; background:#ff7eb9; border:1px solid #f4569c; cursor:pointer;" onclick="selectStickyTheme('theme-pink', this)" title="Vibrant Pink"></button>
+                </div>
+
                 <div id="stickyNotesGrid" class="sticky-notes-grid">
-                    <!-- Sticky Note cards rendered dynamically by JavaScript -->
                 </div>
             </div>
 
@@ -459,7 +240,6 @@ if(isset($_POST['publish']))
 
 </main>
 
-<!-- ANIMATED CONGRATULATIONS SUCCESS MODAL -->
 <?php if ($createdSuccess) { ?>
 <div class="congratulations-modal-overlay active" id="successModal">
     <div class="congratulations-card">
@@ -490,164 +270,152 @@ if(isset($_POST['publish']))
                 <i class="fa-solid fa-eye"></i> View Created Blog
             </a>
             <a href="dashboard.php" class="btn-success-secondary">
-                <i class="fa-solid fa-house"></i> Go to Dashboard
+                <i class="fa-solid fa-house"></i> Return to Dashboard
             </a>
         </div>
-
-        <button type="button" class="close-modal-btn" onclick="document.getElementById('successModal').classList.remove('active')" title="Close">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
     </div>
 </div>
 <?php } ?>
 
+<?php include "includes/footer.php"; ?>
+
 <script>
+const titleInput = document.getElementById("title");
+const titleCount = document.getElementById("titleCount");
+const contentInput = document.getElementById("content");
+const contentCount = document.getElementById("contentCount");
+const imageInput = document.getElementById("image");
+const uploadPrompt = document.getElementById("uploadPrompt");
+const imagePreview = document.getElementById("imagePreview");
 
-const titleInput =
-    document.getElementById("title");
-
-const titleCount =
-    document.getElementById("titleCount");
-
-const contentInput =
-    document.getElementById("content");
-
-const contentCount =
-    document.getElementById("contentCount");
-
-const imageInput =
-    document.getElementById("image");
-
-const imagePreview =
-    document.getElementById("imagePreview");
-
-const uploadPrompt =
-    document.getElementById("uploadPrompt");
-
-function updateTitleCount()
-{
+function updateTitleCount() {
     if (titleInput && titleCount) {
-        titleCount.textContent =
-            titleInput.value.length + " / 255";
+        titleCount.textContent = titleInput.value.length + " / 255";
     }
 }
 
-function updateContentCount()
-{
+function updateContentCount() {
     if (contentInput && contentCount) {
-        contentCount.textContent =
-            contentInput.value.length + " characters";
+        contentCount.textContent = contentInput.value.length + " characters";
     }
 }
 
-if (titleInput) titleInput.addEventListener("input", updateTitleCount);
-if (contentInput) contentInput.addEventListener("input", updateContentCount);
+if (titleInput) {
+    titleInput.addEventListener("input", updateTitleCount);
+    updateTitleCount();
+}
 
-updateTitleCount();
-updateContentCount();
+if (contentInput) {
+    contentInput.addEventListener("input", updateContentCount);
+    updateContentCount();
+}
 
 if (imageInput) {
     imageInput.addEventListener("change", function() {
         const file = this.files[0];
-        if(!file) return;
 
-        const reader = new FileReader();
+        if (file) {
+            const reader = new FileReader();
 
-        reader.onload = function(event) {
-            if (imagePreview) {
-                imagePreview.src = event.target.result;
-                imagePreview.style.display = "block";
-            }
-            if (uploadPrompt) {
-                uploadPrompt.style.display = "none";
-            }
-        };
+            reader.onload = function(e) {
+                if (imagePreview) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = "block";
+                }
+                if (uploadPrompt) {
+                    uploadPrompt.style.display = "none";
+                }
+            };
 
-        reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
+        }
     });
 }
 
-// -------------------------------------------------------------
-// LIVE CLOCK WIDGET LOGIC
-// -------------------------------------------------------------
+// REAL-TIME CLOCK WIDGET LOGIC
 function updateClock() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const timeEl = document.getElementById('clockTime');
+    if (timeEl) timeEl.textContent = `${hours}:${minutes}`;
+
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const dayName = days[now.getDay()];
+    const dayEl = document.getElementById('clockDay');
+    if (dayEl) dayEl.textContent = dayName;
+
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const date = String(now.getDate()).padStart(2, '0');
-
-    const clockTimeEl = document.getElementById('clockTime');
-    const clockDayEl = document.getElementById('clockDay');
-    const clockDateEl = document.getElementById('clockDate');
-
-    if (clockTimeEl) clockTimeEl.textContent = `${hours}:${minutes}`;
-    if (clockDayEl) clockDayEl.textContent = dayName;
-    if (clockDateEl) clockDateEl.textContent = `${year}/${month}/${date}`;
+    const dateEl = document.getElementById('clockDate');
+    if (dateEl) dateEl.textContent = `${year}/${month}/${date}`;
 }
+
 setInterval(updateClock, 1000);
 updateClock();
 
-// -------------------------------------------------------------
-// CALENDAR WIDGET LOGIC
-// -------------------------------------------------------------
+// MONTHLY CALENDAR WIDGET LOGIC
 function generateCalendar() {
     const now = new Date();
-    const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
-    const todayDate = now.getDate();
+    const currentYear = now.getFullYear();
+    const currentDate = now.getDate();
 
-    const calMonthNumEl = document.getElementById('calMonthNum');
-    const calendarGridEl = document.getElementById('calendarGrid');
+    const monthNumEl = document.getElementById('calMonthNum');
+    if (monthNumEl) monthNumEl.textContent = currentMonth + 1;
 
-    if (calMonthNumEl) calMonthNumEl.textContent = currentMonth + 1;
-    if (!calendarGridEl) return;
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    calendarGridEl.innerHTML = '';
+    const gridEl = document.getElementById('calendarGrid');
+    if (!gridEl) return;
 
-    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-    const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+    gridEl.innerHTML = '';
 
-    // Empty cells for previous month padding
-    for (let i = 0; i < firstDayIndex; i++) {
+    for (let i = 0; i < firstDay; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = 'cal-day empty';
-        calendarGridEl.appendChild(emptyCell);
+        gridEl.appendChild(emptyCell);
     }
 
-    // Days of current month
-    for (let day = 1; day <= totalDays; day++) {
+    for (let day = 1; day <= daysInMonth; day++) {
         const dayCell = document.createElement('div');
         dayCell.className = 'cal-day';
-        if (day === todayDate) {
-            dayCell.classList.add('today');
-        }
+        if (day === currentDate) dayCell.classList.add('today');
         dayCell.textContent = day;
-        calendarGridEl.appendChild(dayCell);
+        gridEl.appendChild(dayCell);
     }
 }
+
 generateCalendar();
 
-// -------------------------------------------------------------
-// INTERACTIVE STICKY NOTES LOGIC (PERSISTED IN LOCAL STORAGE)
-// -------------------------------------------------------------
+// INTERACTIVE STICKY NOTES LOGIC
 const STICKY_STORAGE_KEY = 'blogbay_sticky_notes_' + (window.CURRENT_USER_ID || '0');
-const STICKY_COLORS = ['theme-purple', 'theme-magenta', 'theme-cyan'];
+let currentSelectedTheme = 'theme-yellow';
+
+function selectStickyTheme(theme, btnEl) {
+    currentSelectedTheme = theme;
+    document.querySelectorAll('#stickyColorPalette .color-pill').forEach(btn => {
+        btn.style.boxShadow = 'none';
+        btn.classList.remove('active');
+    });
+    if (btnEl) {
+        btnEl.classList.add('active');
+        btnEl.style.boxShadow = '0 0 0 2px var(--purple)';
+    }
+}
 
 function getStickyNotes() {
     try {
         const stored = localStorage.getItem(STICKY_STORAGE_KEY);
-        if (stored) return JSON.parse(stored);
-        return [
-            { id: 1, text: "Draft outline & headline ideas", theme: "theme-purple" },
-            { id: 2, text: "Upload high-res cover photo", theme: "theme-magenta" }
-        ];
-    } catch(e) {
-        return [];
-    }
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    } catch(e) {}
+    return [{ id: 1, text: "", theme: "theme-yellow" }];
 }
 
 function saveStickyNotes(notes) {
@@ -664,13 +432,13 @@ function renderStickyNotes() {
     gridEl.innerHTML = '';
 
     if (notes.length === 0) {
-        gridEl.innerHTML = '<div class="empty-sticky-notes">No sticky notes yet. Click <i class="fa-solid fa-plus"></i> above to create one!</div>';
+        gridEl.innerHTML = '<div class="empty-sticky-notes" style="border: 1px dashed rgba(147, 104, 184, 0.4); background: rgba(248, 246, 252, 0.6); border-radius: 16px; padding: 24px 16px; text-align: center; font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.5;">No sticky notes yet. Click <strong style="color:var(--purple); font-size:14px; cursor:pointer;" onclick="addStickyNote()">+</strong> above to create one!</div>';
         return;
     }
 
     notes.forEach(note => {
         const card = document.createElement('div');
-        card.className = `sticky-note-card ${note.theme || 'theme-purple'}`;
+        card.className = `sticky-note-card ${note.theme || 'theme-yellow'}`;
         card.dataset.id = note.id;
 
         const header = document.createElement('div');
@@ -697,7 +465,6 @@ function renderStickyNotes() {
         textarea.placeholder = 'Click here to write note...';
         textarea.value = note.text || '';
         
-        // Auto save on input
         textarea.addEventListener('input', function() {
             updateStickyNoteText(note.id, this.value);
         });
@@ -725,18 +492,16 @@ function updateStickyNoteText(id, text) {
 function addStickyNote() {
     let notes = getStickyNotes();
     const newId = Date.now();
-    const nextTheme = STICKY_COLORS[notes.length % STICKY_COLORS.length];
     
-    notes.push({
+    notes.unshift({
         id: newId,
         text: "",
-        theme: nextTheme
+        theme: currentSelectedTheme || 'theme-yellow'
     });
     
     saveStickyNotes(notes);
     renderStickyNotes();
 
-    // Focus newly created sticky note textarea
     setTimeout(() => {
         const card = document.querySelector(`.sticky-note-card[data-id="${newId}"]`);
         if (card) {
@@ -761,11 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addStickyBtn.addEventListener('click', addStickyNote);
     }
 });
-
 </script>
 
-<?php include "includes/footer.php"; ?>
-
 </body>
-
 </html>

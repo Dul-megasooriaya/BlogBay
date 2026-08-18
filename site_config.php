@@ -67,14 +67,16 @@ function renderHeroHeader(string $activeNav = '', string $searchVal = '', bool $
     </header>';
 }
 
-function getUserProfilePic($conn, int $userId): ?string
-{
-    if ($userId <= 0 || !$conn) return null;
-    $res = mysqli_query($conn, "SELECT profile_pic FROM user_profiles WHERE user_id = $userId LIMIT 1");
-    if ($res && $row = mysqli_fetch_assoc($res)) {
-        return $row['profile_pic'];
+if (!function_exists('getUserProfilePic')) {
+    function getUserProfilePic($conn, int $userId): ?string
+    {
+        if ($userId <= 0 || !$conn) return null;
+        $res = mysqli_query($conn, "SELECT profile_pic FROM user_profiles WHERE user_id = $userId LIMIT 1");
+        if ($res && $row = mysqli_fetch_assoc($res)) {
+            return $row['profile_pic'];
+        }
+        return null;
     }
-    return null;
 }
 
 function renderUserAvatar(?string $username, ?string $profilePic, string $containerClass = 'author-avatar'): string
